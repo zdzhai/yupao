@@ -1,6 +1,6 @@
-package com.yupi.usercenter.exception;
+package com.yupi.yupao.exception;
 
-import com.yupi.usercenter.common.ErrorCode;
+import com.yupi.yupao.common.ErrorCode;
 
 /**
  * @author Zhai Zhidong

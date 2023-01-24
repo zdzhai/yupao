@@ -1,9 +1,10 @@
-package com.yupi.usercenter.service;
+package com.yupi.yupao.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.yupi.usercenter.model.domain.User;
+import com.yupi.yupao.model.domain.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author 62618
@@ -43,4 +44,13 @@ public interface UserService extends IService<User> {
      * @return
      */
     int userLogout(HttpServletRequest request);
+
+    /**
+     * 根据标签查询用户
+     * @param tagList
+     * @return
+     */
+    List<User> searchUsersByTags(List<String> tagList);
+
+    List<User> searchUsersBySQL(List<String> tagNameList);
 }

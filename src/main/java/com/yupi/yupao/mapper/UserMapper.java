@@ -1,7 +1,7 @@
-package com.yupi.usercenter.mapper;
+package com.yupi.yupao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.yupi.usercenter.model.domain.User;
+import com.yupi.yupao.model.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

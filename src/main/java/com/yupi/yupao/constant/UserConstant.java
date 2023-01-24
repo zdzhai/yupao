@@ -1,4 +1,4 @@
-package com.yupi.usercenter.constant;
+package com.yupi.yupao.constant;
 
 /**
  * @author Zhai Zhidong

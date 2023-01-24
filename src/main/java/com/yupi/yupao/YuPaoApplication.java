@@ -1,4 +1,4 @@
-package com.yupi.usercenter;
+package com.yupi.yupao;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,8 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 
-public class UserCenterApplication {
+public class YuPaoApplication {
     public static void main(String[] args) {
-        SpringApplication.run(UserCenterApplication.class,args);
+        SpringApplication.run(YuPaoApplication.class,args);
     }
 }

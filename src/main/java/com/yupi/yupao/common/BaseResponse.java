@@ -1,9 +1,8 @@
-package com.yupi.usercenter.common;
+package com.yupi.yupao.common;
 
 import lombok.Data;
 
 import java.io.Serializable;
-import java.io.StringReader;
 
 /**
  * @author Zhai Zhidong

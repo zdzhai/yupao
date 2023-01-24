@@ -19,3 +19,5 @@ create table user
 )
     comment '用户表';
 
+
+alter table user add column tags varchar(1024) null comment '标签列表';
