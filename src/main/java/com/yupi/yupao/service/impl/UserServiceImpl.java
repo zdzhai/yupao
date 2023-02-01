@@ -6,9 +6,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.exception.BusinessException;
+import com.yupi.yupao.mapper.UserMapper;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.service.UserService;
-import com.yupi.yupao.mapper.UserMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -16,12 +16,15 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.yupi.yupao.constant.UserConstant.ADMIN_ROLE;
 import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -156,6 +159,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setPhone(originUser.getPhone());
         safetyUser.setCreatTime(originUser.getCreatTime());
         safetyUser.setTags(originUser.getTags());
+        safetyUser.setProfile(originUser.getProfile());
         return safetyUser;
     }
 
@@ -197,6 +201,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             //把json字符串反序列化为json对象
             Set<String> tempTagNameSet = gson.fromJson(tagsStr,new TypeToken<Set<String>>(){}.getType());
+            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
             for (String tagName: tagNameList) {
                 if (!tempTagNameSet.contains(tagName)){
                     return false;
@@ -204,6 +209,47 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    @Override
+    public int updateUser(User user, User loginUser){
+        Long userId = user.getId();
+        if (userId < 0 ){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //2.权限管理
+        //2.1 管理员可以修改任意用户信息
+        //2.2 用户只能修改个人信息
+        if (!isAdmin(loginUser) && !userId.equals(loginUser.getId())){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User oldUser = userMapper.selectById(userId);
+        if (oldUser == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+       return userMapper.updateById(user);
+    }
+    /**
+     * 是否是管理员
+     * @param loginUser
+     * @return
+     */
+    @Override
+    public boolean isAdmin(User loginUser){
+        //仅管理员可查询
+        return loginUser != null && loginUser.getUserRole() == ADMIN_ROLE;
+    }
+    /**
+     * 是否是管理员
+     * @param request
+     * @return
+     */
+    @Override
+    public boolean isAdmin(HttpServletRequest request){
+        //仅管理员可查询
+        Object obj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) obj;
+        return user != null && user.getUserRole() == ADMIN_ROLE;
     }
 }
 

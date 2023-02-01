@@ -16,77 +16,100 @@ public class User implements Serializable {
     /**
      * 
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
      * 用户昵称
      */
+    @TableField(value = "username")
     private String username;
 
     /**
      * 账号
      */
+    @TableField(value = "userAccount")
     private String userAccount;
 
     /**
      * 用户头像
      */
+    @TableField(value = "avatarUrl")
     private String avatarUrl;
 
     /**
      * 性别
      */
+    @TableField(value = "gender")
     private Integer gender;
 
     /**
      * 用户密码
      */
+    @TableField(value = "userPassword")
     private String userPassword;
 
     /**
      * 邮箱
      */
+    @TableField(value = "email")
     private String email;
 
     /**
      * 状态0-正常
      */
+    @TableField(value = "userStatus")
     private Integer userStatus;
 
     /**
      * 电话
      */
+    @TableField(value = "phone")
     private String phone;
 
     /**
      * 创建时间
      */
+    @TableField(value = "creatTime")
     private Date creatTime;
 
     /**
      * 更新时间
      */
+    @TableField(value = "updateTime")
     private Date updateTime;
 
     /**
      * 逻辑删除 0 不删除 1删除
      */
     @TableLogic
+    @TableField(value = "isDelete")
     private Integer isDelete;
 
     /**
      * 用户角色：0 普通用户 1管理员
      */
+    @TableField(value = "userRole")
     private Integer userRole;
+
     /**
      * 星球编号
      */
+    @TableField(value = "planetCode")
     private String planetCode;
+
     /**
-     * 用户标签列表 json
+     * 标签 json列表
      */
+    @TableField(value = "tags")
     private String tags;
+
+    /**
+     * 个人简介
+     */
+    @TableField(value = "profile")
+    private String profile;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -101,22 +124,23 @@ public class User implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        com.yupi.yupao.model.domain.User other = (com.yupi.yupao.model.domain.User) that;
+        User other = (User) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-                && (this.getUsername() == null ? other.getUsername() == null : this.getUsername().equals(other.getUsername()))
-                && (this.getUserAccount() == null ? other.getUserAccount() == null : this.getUserAccount().equals(other.getUserAccount()))
-                && (this.getAvatarUrl() == null ? other.getAvatarUrl() == null : this.getAvatarUrl().equals(other.getAvatarUrl()))
-                && (this.getGender() == null ? other.getGender() == null : this.getGender().equals(other.getGender()))
-                && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
-                && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
-                && (this.getUserStatus() == null ? other.getUserStatus() == null : this.getUserStatus().equals(other.getUserStatus()))
-                && (this.getPhone() == null ? other.getPhone() == null : this.getPhone().equals(other.getPhone()))
-                && (this.getCreatTime() == null ? other.getCreatTime() == null : this.getCreatTime().equals(other.getCreatTime()))
-                && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
-                && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
-                && (this.getUserRole() == null ? other.getUserRole() == null : this.getUserRole().equals(other.getUserRole()))
-                && (this.getTags() == null ? other.getTags() == null : this.getTags().equals(other.getTags()))
-                && (this.getPlanetCode() == null ? other.getPlanetCode() == null : this.getPlanetCode().equals(other.getPlanetCode()));
+            && (this.getUsername() == null ? other.getUsername() == null : this.getUsername().equals(other.getUsername()))
+            && (this.getUserAccount() == null ? other.getUserAccount() == null : this.getUserAccount().equals(other.getUserAccount()))
+            && (this.getAvatarUrl() == null ? other.getAvatarUrl() == null : this.getAvatarUrl().equals(other.getAvatarUrl()))
+            && (this.getGender() == null ? other.getGender() == null : this.getGender().equals(other.getGender()))
+            && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
+            && (this.getEmail() == null ? other.getEmail() == null : this.getEmail().equals(other.getEmail()))
+            && (this.getUserStatus() == null ? other.getUserStatus() == null : this.getUserStatus().equals(other.getUserStatus()))
+            && (this.getPhone() == null ? other.getPhone() == null : this.getPhone().equals(other.getPhone()))
+            && (this.getCreatTime() == null ? other.getCreatTime() == null : this.getCreatTime().equals(other.getCreatTime()))
+            && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
+            && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()))
+            && (this.getUserRole() == null ? other.getUserRole() == null : this.getUserRole().equals(other.getUserRole()))
+            && (this.getPlanetCode() == null ? other.getPlanetCode() == null : this.getPlanetCode().equals(other.getPlanetCode()))
+            && (this.getTags() == null ? other.getTags() == null : this.getTags().equals(other.getTags()))
+            && (this.getProfile() == null ? other.getProfile() == null : this.getProfile().equals(other.getProfile()));
     }
 
     @Override
@@ -136,8 +160,9 @@ public class User implements Serializable {
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
         result = prime * result + ((getUserRole() == null) ? 0 : getUserRole().hashCode());
-        result = prime * result + ((getTags() == null) ? 0 : getTags().hashCode());
         result = prime * result + ((getPlanetCode() == null) ? 0 : getPlanetCode().hashCode());
+        result = prime * result + ((getTags() == null) ? 0 : getTags().hashCode());
+        result = prime * result + ((getProfile() == null) ? 0 : getProfile().hashCode());
         return result;
     }
 
@@ -161,7 +186,8 @@ public class User implements Serializable {
         sb.append(", isDelete=").append(isDelete);
         sb.append(", userRole=").append(userRole);
         sb.append(", planetCode=").append(planetCode);
-        sb.append(", planetCode=").append(tags);
+        sb.append(", tags=").append(tags);
+        sb.append(", profile=").append(profile);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

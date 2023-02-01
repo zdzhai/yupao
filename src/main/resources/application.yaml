@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev
   application:
     name: user-center
   # DataSource Config
@@ -9,10 +11,25 @@ spring:
     url: jdbc:mysql://localhost:3306/yupi
   session:
     timeout: 86400
+    store-type: redis
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  # redis 配置
+  redis:
+    port: 6379
+    host: localhost
+    database: 0
 server:
   port: 8080
   servlet:
     context-path: /api
+    session:
+      cookie:
+        domain: localhost #设置cookie的作用域
+#    session:
+#      cookie:
+#        domain:
 
 mybatis-plus:
   configuration:

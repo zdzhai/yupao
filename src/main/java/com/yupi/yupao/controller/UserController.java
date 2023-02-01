@@ -10,10 +10,12 @@ import com.yupi.yupao.model.domain.request.UserLoginRequest;
 import com.yupi.yupao.model.domain.request.UserRegisterRequest;
 import com.yupi.yupao.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,8 @@ import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:5173"},
+            allowCredentials = "true")
 public class UserController {
 
     @Resource
@@ -63,7 +66,7 @@ public class UserController {
         return ResultUtils.success(user);
     }
     @PostMapping("/logout")
-    public BaseResponse<Integer> userLogin(HttpServletRequest request){
+    public BaseResponse<Integer> userLogout(HttpServletRequest request){
         if (request == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -87,7 +90,7 @@ public class UserController {
     @GetMapping("/search")
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request){
         //仅管理员可查询
-        if (!isAdmin(request)){
+        if (!userService.isAdmin(request)){
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
@@ -103,7 +106,7 @@ public class UserController {
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request){
         //仅管理员可查询
-        if (!isAdmin(request)){
+        if (!userService.isAdmin(request)){
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         if (id <= 0){
@@ -113,15 +116,27 @@ public class UserController {
         return ResultUtils.success(b);
     }
 
-    /**
-     * 是否是管理员
-     * @param request
-     * @return
-     */
-    public boolean isAdmin(HttpServletRequest request){
-        //仅管理员可查询
-        Object obj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) obj;
-        return user != null && user.getUserRole() == ADMIN_ROLE;
+    @GetMapping("/search/tags")
+    public BaseResponse<List<User>> searchUserByTags(@RequestParam(required = false)
+                                                             List<String> tagNameList){
+        if (CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        return ResultUtils.success(userList);
     }
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user,HttpServletRequest request){
+        if (user == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //todo 如果用户没有传任何字段的值，直接报错
+        //获取当前登录用户
+        User loginUser = getCurrentUser(request).getData();
+        int res = userService.updateUser(user, loginUser);
+        return ResultUtils.success(res);
+
+    }
+
+
 }

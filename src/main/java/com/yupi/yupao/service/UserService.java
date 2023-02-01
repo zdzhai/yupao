@@ -6,6 +6,9 @@ import com.yupi.yupao.model.domain.User;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static com.yupi.yupao.constant.UserConstant.ADMIN_ROLE;
+import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
+
 /**
 * @author 62618
 * @description 针对表【user(用户表)】的数据库操作Service
@@ -53,4 +56,26 @@ public interface UserService extends IService<User> {
     List<User> searchUsersByTags(List<String> tagList);
 
     List<User> searchUsersBySQL(List<String> tagNameList);
+
+    /**
+     * 更新用户信息
+     * @param user
+     * @param loginUser
+     * @return
+     */
+    int updateUser(User user, User loginUser);
+
+    /**
+     * 当前用户是否是管理员
+     * @param loginUser
+     * @return
+     */
+    boolean isAdmin(User loginUser);
+
+    /**
+     * 是否是管理员
+     * @param request
+     * @return
+     */
+     boolean isAdmin(HttpServletRequest request);
 }
