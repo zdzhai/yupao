@@ -1,6 +1,7 @@
 package com.yupi.yupao.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.common.ResultUtils;
@@ -9,17 +10,18 @@ import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.request.UserLoginRequest;
 import com.yupi.yupao.model.domain.request.UserRegisterRequest;
 import com.yupi.yupao.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.yupi.yupao.constant.UserConstant.ADMIN_ROLE;
 import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -31,10 +33,14 @@ import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
 @RequestMapping("/user")
 @CrossOrigin(origins = {"http://localhost:5173"},
             allowCredentials = "true")
+@Slf4j
 public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedisTemplate<String,Object> redisTemplate;
 
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
@@ -124,6 +130,31 @@ public class UserController {
         }
         List<User> userList = userService.searchUsersByTags(tagNameList);
         return ResultUtils.success(userList);
+    }
+    @GetMapping("/recommend")
+    public BaseResponse<Page<User>> recommendUsers(long pageNum,long pageSize,HttpServletRequest request){
+        BaseResponse<User> res = getCurrentUser(request);
+        User loginUser = res.getData();
+        //如果有缓存，直接查缓存
+        String redisKey = String.format("yupao:user:recommend:%s",loginUser.getId()) ;
+        Page<User> userPage = (Page<User>) redisTemplate.opsForValue().get(redisKey);
+        if (userPage != null){
+            return ResultUtils.success(userPage);
+        }
+        //无缓存，去查数据库
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        userPage = userService.page(new Page<>(pageNum, pageSize),queryWrapper);
+        //写缓存
+        try {
+            redisTemplate.opsForValue().set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);
+        } catch (Exception exception) {
+            log.error("redis key error",exception);
+        }
+        return ResultUtils.success(userPage);
+        //todo 这里还不太理解stream()流
+//        return ResultUtils.success(userList.stream().map(user -> {
+//            return userService.getSafetyUser(user);
+//        }).collect(Collectors.toList()));
     }
     @PostMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User user,HttpServletRequest request){

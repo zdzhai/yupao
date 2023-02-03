@@ -6,9 +6,6 @@ import com.yupi.yupao.model.domain.User;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static com.yupi.yupao.constant.UserConstant.ADMIN_ROLE;
-import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
-
 /**
 * @author 62618
 * @description 针对表【user(用户表)】的数据库操作Service
