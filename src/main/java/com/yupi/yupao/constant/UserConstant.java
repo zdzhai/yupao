@@ -1,8 +1,7 @@
 package com.yupi.yupao.constant;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/2 10:10
  * 用户常量
  */

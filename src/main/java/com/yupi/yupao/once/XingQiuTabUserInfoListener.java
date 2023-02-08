@@ -8,8 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/24 22:54
  */
 // 有个很重要的点 XingQiuTabUserInfoListener 不能被spring管理，

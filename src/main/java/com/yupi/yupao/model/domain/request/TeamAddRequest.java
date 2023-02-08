@@ -1,26 +1,16 @@
-package com.yupi.yupao.model.dto;
+package com.yupi.yupao.model.domain.request;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.yupi.yupao.common.PageRequest;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
  * @author dongdong
- * @Date 2023/2/6 20:56
- * 更新队伍数据传输对象
+ * @Date 2023/2/8 20:09
+ * 添加队伍请求类
  */
 @Data
-public class TeamQuery extends PageRequest {
-    /**
-     * id
-     */
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class TeamAddRequest {
 
     /**
      * 队伍名称
@@ -52,6 +42,10 @@ public class TeamQuery extends PageRequest {
      */
     private Integer status;
 
+    /**
+     * 密码
+     */
+    private String password;
 
 
 }

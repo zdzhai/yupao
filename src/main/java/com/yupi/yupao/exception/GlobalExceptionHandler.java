@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/4 18:07
  * 捕获代码中出现的所有异常并集中处理。
  * 自定义全局异常处理器来处理抛出的异常！！！

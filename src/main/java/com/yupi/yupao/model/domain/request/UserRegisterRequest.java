@@ -5,8 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/1 22:41
  * 用户注册请求体
  */

@@ -13,8 +13,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import javax.annotation.Resource;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/2/3 19:41
  */
 @SpringBootTest

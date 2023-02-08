@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.common.ResultUtils;
-import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Team;
+import com.yupi.yupao.model.domain.User;
+import com.yupi.yupao.model.domain.request.TeamAddRequest;
+import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.service.TeamService;
 import com.yupi.yupao.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +17,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/1 22:34
  */
 @RestController
@@ -35,16 +37,21 @@ public class TeamController {
     @Resource
     private TeamService teamService;
 
+
+
     @PostMapping("/add")
-    public BaseResponse<Long> addTeam(@RequestBody Team team){
-        if (team == null){
+    public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request){
+        if (teamAddRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean save = teamService.save(team);
-        if (!save){
+        Team team = new Team();
+        BeanUtils.copyProperties(teamAddRequest,team);
+        User loginUser = userService.getLoginUser(request);
+        long result = teamService.addTeam(team,loginUser);
+        if (result < 0){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-        return ResultUtils.success(team.getId());
+        return ResultUtils.success(result);
     }
 
     @PostMapping("/delete")

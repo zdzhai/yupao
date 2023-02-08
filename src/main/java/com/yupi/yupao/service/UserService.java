@@ -75,4 +75,6 @@ public interface UserService extends IService<User> {
      * @return
      */
      boolean isAdmin(HttpServletRequest request);
+
+    User getLoginUser(HttpServletRequest request);
 }

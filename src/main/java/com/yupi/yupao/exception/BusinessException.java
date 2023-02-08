@@ -3,8 +3,7 @@ package com.yupi.yupao.exception;
 import com.yupi.yupao.common.ErrorCode;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/4 17:40
  * 自定义业务处理异常类
  * 在还没有定义全局异常处理器之前，throw出去我们自定义的异常

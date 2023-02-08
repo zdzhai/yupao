@@ -1,8 +1,7 @@
 package com.yupi.yupao.common;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/4 17:08
  *
  * 返回工具类

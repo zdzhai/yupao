@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 import static com.yupi.yupao.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
- * @author Zhai Zhidong
- * @version 1.0
+ * @author dongdong
  * @Date 2023/1/1 22:34
  */
 @RestController
@@ -81,12 +80,11 @@ public class UserController {
     }
     @GetMapping("/current")
     public BaseResponse<User> getCurrentUser(HttpServletRequest request){
-        Object objUser = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) objUser;
-        if (currentUser == null){
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null){
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
-        Long id = currentUser.getId();
+        Long id = loginUser.getId();
         //todo 校验用户是否合法
         User user = userService.getById(id);
         User safetyUser = userService.getSafetyUser(user);
