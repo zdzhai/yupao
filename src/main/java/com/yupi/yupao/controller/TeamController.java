@@ -94,16 +94,15 @@ public class TeamController {
     }
 
     @GetMapping("/list")
-    public BaseResponse<List<Team>> listTeam(TeamQuery teamQuery){
+    public BaseResponse<List<Team>> listTeam(TeamQuery teamQuery,HttpServletRequest request){
         if (teamQuery == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = new Team();
-        BeanUtils.copyProperties(teamQuery,team);
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        List<Team> resultList = teamService.list(queryWrapper);
-
-        return ResultUtils.success(resultList);
+        TeamAddRequest teamAddRequest = new TeamAddRequest();
+        BeanUtils.copyProperties(teamQuery,teamAddRequest);
+        boolean loginUser = userService.isAdmin(request);
+        List<Team> teamList = teamService.listTeam(teamAddRequest, loginUser);
+        return ResultUtils.success(teamList);
     }
 
     @GetMapping("/list/page")

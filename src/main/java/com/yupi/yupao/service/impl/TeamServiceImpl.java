@@ -2,22 +2,26 @@ package com.yupi.yupao.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
+import com.yupi.yupao.common.ResultUtils;
 import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.mapper.TeamMapper;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.UserTeam;
+import com.yupi.yupao.model.domain.request.TeamAddRequest;
 import com.yupi.yupao.model.enums.TeamStatusEnum;
 import com.yupi.yupao.service.TeamService;
 import com.yupi.yupao.service.UserTeamService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -105,6 +109,14 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"创建队伍失败");
         }
         return teamId;
+    }
+
+    @Override
+    public List<Team> listTeam(TeamAddRequest teamAddRequest,boolean loginUser){
+
+        List<Team> teamList = new ArrayList<>();
+
+        return teamList;
     }
 }
 

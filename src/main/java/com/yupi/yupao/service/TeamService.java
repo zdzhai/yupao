@@ -1,9 +1,12 @@
 package com.yupi.yupao.service;
 
+import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.request.TeamAddRequest;
+
+import java.util.List;
 
 /**
 * @author dongdong
@@ -13,4 +16,6 @@ import com.yupi.yupao.model.domain.request.TeamAddRequest;
 public interface TeamService extends IService<Team> {
 
     long addTeam(Team team, User loginUser);
+
+    List<Team> listTeam(TeamAddRequest teamAddRequest, boolean loginUser);
 }
