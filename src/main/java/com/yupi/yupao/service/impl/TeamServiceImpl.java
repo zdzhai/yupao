@@ -2,19 +2,22 @@ package com.yupi.yupao.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
-import com.yupi.yupao.common.ResultUtils;
 import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.mapper.TeamMapper;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.UserTeam;
-import com.yupi.yupao.model.domain.request.TeamAddRequest;
+import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.model.enums.TeamStatusEnum;
+import com.yupi.yupao.model.vo.TeamUserVO;
+import com.yupi.yupao.model.vo.UserVO;
 import com.yupi.yupao.service.TeamService;
+import com.yupi.yupao.service.UserService;
 import com.yupi.yupao.service.UserTeamService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +30,7 @@ import java.util.Optional;
 /**
 * @author dongdong
 * @description 针对表【team(队伍)】的数据库操作Service实现
-* @createDate 2023-02-06 20:40:07
+* @Date 2023-02-06 20:40:07
 */
 @Service
 
@@ -36,6 +39,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Resource
     private UserTeamService userTeamService;
+
+    @Resource
+    private UserService userService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long addTeam(Team team, User loginUser) {
@@ -87,8 +94,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         //todo 可能同时创建100个队伍 加锁
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId",userId);
-        long hasTeamNUm = this.count(queryWrapper);
-        if (hasTeamNUm >= 5){
+        long hasTeamNum = this.count(queryWrapper);
+        if (hasTeamNum >= 5){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"只能创建5个队伍");
         }
         //4.插入队伍信息到队伍表，这里要开启事务，防止两个数据库插入数据不同步
@@ -112,11 +119,78 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<Team> listTeam(TeamAddRequest teamAddRequest,boolean loginUser){
+    public List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin){
+        if (teamQuery == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
+        Long id = teamQuery.getId();
+        if (id != null && id > 0){
+            queryWrapper.eq("id",id);
+        }
+        String searchText = teamQuery.getSearchText();
+        if (StringUtils.isNotBlank(searchText)){
+            queryWrapper.and(qw -> qw.like("name",searchText)
+                    .or().like("description",searchText));
+        }
+        String name = teamQuery.getName();
+        if (StringUtils.isNotBlank(name)){
+            queryWrapper.like("name",name);
+        }
+        String description = teamQuery.getDescription();
+        if (StringUtils.isNotBlank(description)){
+            queryWrapper.like("description",description);
+        }
+        Integer maxNum = teamQuery.getMaxNum();
+        //查询人数为maxNum的队伍
+        if (maxNum != null && maxNum > 0){
+            queryWrapper.eq("maxNum",maxNum);
+        }
+        Integer status = teamQuery.getStatus();
+        //只有管理员可以查看私密房间
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
+        if (statusEnum == null){
+            statusEnum  = TeamStatusEnum.PUBLIC;
+        }
+        //如果不是管理员并且访问私密房间
+        if (!isAdmin && !statusEnum.equals(TeamStatusEnum.PUBLIC)){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        queryWrapper.eq("status",statusEnum.getValue());
 
-        List<Team> teamList = new ArrayList<>();
-
-        return teamList;
+        Long userId = teamQuery.getUserId();
+        if (userId != null && userId > 0){
+            queryWrapper.eq("userId",userId);
+        }
+        //不展示已过期的队伍,expireTime is null or expireTime > now
+        queryWrapper.and(qw -> qw.gt("expireTime",new Date())
+                .or().isNull("expireTime"));
+        List<Team> teamList = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(teamList)){
+            return new ArrayList<>();
+        }
+        List<TeamUserVO> teamUserVOList = new ArrayList<>();
+        //关联查询用户信息
+        //1.查询队伍和队伍创建人的信息
+        // select * from team t left join user u on t.userId = u.id;
+        //关联查询已加入队伍的用户信息
+        //select * from team t join user_team ut on t.id = ut.teamId
+        // left join user u on ut.userId = u.id;
+        for (Team team: teamList){
+            userId = team.getUserId();
+            if (userId == null){
+                continue;
+            }
+            User user = userService.getById(userId);
+            //脱敏用户信息
+            TeamUserVO teamUserVO = new TeamUserVO();
+            BeanUtils.copyProperties(team,teamUserVO);
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user,userVO);
+            teamUserVO.setUserVO(userVO);
+            teamUserVOList.add(teamUserVO);
+        }
+        return teamUserVOList;
     }
 }
 

@@ -1,26 +1,20 @@
-package com.yupi.yupao.model.dto;
+package com.yupi.yupao.model.vo;
 
-import com.yupi.yupao.common.PageRequest;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
  * @author dongdong
- * @Date 2023/2/6 20:56
- * 更新队伍数据传输对象
+ * @Date 2023/2/10 22:11
  */
 @Data
-public class TeamQuery extends PageRequest {
+public class TeamUserVO {
     /**
      * id
      */
     private Long id;
 
-    /**
-     * 搜索关键词
-     */
-    private String searchText;
     /**
      * 队伍名称
      */
@@ -51,6 +45,23 @@ public class TeamQuery extends PageRequest {
      */
     private Integer status;
 
+    /**
+     * 密码
+     */
+    private String password;
 
+    /**
+     * 创建时间
+     */
+    private Date createTime;
 
+    /**
+     *
+     */
+    private Date updateTime;
+
+    /**
+     * 创建人信息
+     */
+    UserVO userVO;
 }

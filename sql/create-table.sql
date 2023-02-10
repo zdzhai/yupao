@@ -37,3 +37,10 @@ create table user_team
     updateTime datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     isDelete   tinyint  default 0 not null comment '是否删除'
 ) comment '用户队伍关系';
+
+
+--        1.查询队伍和队伍创建人的信息
+        -- select * from team t left join user u on t.userId = u.id;
+--         关联查询已加入队伍的用户信息
+--         select * from team t join user_team ut on t.id = ut.teamId
+--         left join user u on ut.userId = u.id;

@@ -5,6 +5,8 @@ import com.yupi.yupao.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.request.TeamAddRequest;
+import com.yupi.yupao.model.dto.TeamQuery;
+import com.yupi.yupao.model.vo.TeamUserVO;
 
 import java.util.List;
 
@@ -15,7 +17,19 @@ import java.util.List;
 */
 public interface TeamService extends IService<Team> {
 
+    /**
+     * 添加队伍
+     * @param team
+     * @param loginUser
+     * @return
+     */
     long addTeam(Team team, User loginUser);
 
-    List<Team> listTeam(TeamAddRequest teamAddRequest, boolean loginUser);
+    /**
+     * 展示队伍
+     * @param teamQuery
+     * @param isAdmin
+     * @return
+     */
+    List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
 }
