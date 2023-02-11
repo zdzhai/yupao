@@ -8,6 +8,7 @@ import com.yupi.yupao.mapper.TeamMapper;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.UserTeam;
+import com.yupi.yupao.model.domain.request.TeamUpdateRequest;
 import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.model.enums.TeamStatusEnum;
 import com.yupi.yupao.model.vo.TeamUserVO;
@@ -182,15 +183,46 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 continue;
             }
             User user = userService.getById(userId);
-            //脱敏用户信息
             TeamUserVO teamUserVO = new TeamUserVO();
-            BeanUtils.copyProperties(team,teamUserVO);
-            UserVO userVO = new UserVO();
-            BeanUtils.copyProperties(user,userVO);
-            teamUserVO.setUserVO(userVO);
-            teamUserVOList.add(teamUserVO);
+            //脱敏用户信息
+            if (user != null){
+                BeanUtils.copyProperties(team,teamUserVO);
+                UserVO userVO = new UserVO();
+                BeanUtils.copyProperties(user,userVO);
+                teamUserVO.setUserVO(userVO);
+                teamUserVOList.add(teamUserVO);
+            }
         }
         return teamUserVOList;
+    }
+
+    @Override
+    public boolean updateTeams(TeamUpdateRequest teamUpdateRequest, User loginUser){
+        if (teamUpdateRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = teamUpdateRequest.getId();
+        if (id == null && id < 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Team oldTeam = this.getById(id);
+        if (oldTeam == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        Long createUserId = oldTeam.getUserId();
+        if (!loginUser.getId().equals(createUserId) && !userService.isAdmin(loginUser)){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        Integer status = teamUpdateRequest.getStatus();
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
+        if (TeamStatusEnum.SECRET.equals(statusEnum)){
+            if (StringUtils.isNotBlank(teamUpdateRequest.getPassword())){
+                throw new BusinessException(ErrorCode.PARAMS_ERROR,"加密房间要有密码");
+            }
+        }
+        Team newTeam = new Team();
+        BeanUtils.copyProperties(teamUpdateRequest,newTeam);
+        return this.updateById(newTeam);
     }
 }
 

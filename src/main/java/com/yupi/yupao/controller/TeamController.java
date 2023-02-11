@@ -9,6 +9,7 @@ import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.request.TeamAddRequest;
+import com.yupi.yupao.model.domain.request.TeamUpdateRequest;
 import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.model.vo.TeamUserVO;
 import com.yupi.yupao.service.TeamService;
@@ -70,12 +71,12 @@ public class TeamController {
     }
 
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateTeam(@RequestBody Team team){
-        if (team == null){
+    public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request){
+        if (teamUpdateRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        boolean result = teamService.update(queryWrapper);
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.updateTeams(teamUpdateRequest, loginUser);
         if (!result){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"更新失败");
         }

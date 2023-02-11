@@ -6,7 +6,9 @@ package com.yupi.yupao.model.enums;
  * 队伍状态枚举
  */
 public enum TeamStatusEnum {
-
+    /**
+    公开，私有，加密
+     */
     PUBLIC(0,"公开"),
     PRIVATE(1, "私有"),
     SECRET(2, "加密");
