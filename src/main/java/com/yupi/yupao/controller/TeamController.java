@@ -2,6 +2,7 @@ package com.yupi.yupao.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.common.ResultUtils;
@@ -9,11 +10,14 @@ import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.request.TeamAddRequest;
+import com.yupi.yupao.model.domain.request.TeamJoinRequest;
+import com.yupi.yupao.model.domain.request.TeamQuitRequest;
 import com.yupi.yupao.model.domain.request.TeamUpdateRequest;
 import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.model.vo.TeamUserVO;
 import com.yupi.yupao.service.TeamService;
 import com.yupi.yupao.service.UserService;
+import javafx.geometry.Pos;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -118,5 +122,37 @@ public class TeamController {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         Page<Team> resultList = teamService.page(page,queryWrapper);
         return ResultUtils.success(resultList);
+    }
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request){
+        if (teamJoinRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        boolean result = teamService.joinTeam(teamJoinRequest, loginUser);
+        if (!result){
+            throw new BusinessException(ErrorCode.NULL_ERROR,"加入用户失败");
+        }
+        return ResultUtils.success(result);
+    }
+
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request){
+        if (teamQuitRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        boolean result = teamService.quitTeam(teamQuitRequest,loginUser);
+        if (!result){
+            throw new BusinessException(ErrorCode.NULL_ERROR,"加入用户失败");
+        }
+        return ResultUtils.success(result);
     }
 }
