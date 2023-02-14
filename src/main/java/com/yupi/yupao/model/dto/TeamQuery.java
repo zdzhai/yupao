@@ -4,6 +4,7 @@ import com.yupi.yupao.common.PageRequest;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author dongdong
@@ -17,6 +18,10 @@ public class TeamQuery extends PageRequest {
      */
     private Long id;
 
+    /**
+     * 返回个人创建的所有队伍id
+     */
+    private List<Long> idList;
     /**
      * 搜索关键词
      */

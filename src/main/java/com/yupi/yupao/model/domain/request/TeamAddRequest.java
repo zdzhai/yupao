@@ -13,6 +13,10 @@ import java.util.Date;
 public class TeamAddRequest {
 
     /**
+     * 队伍ID
+     */
+    private Long id;
+    /**
      * 队伍名称
      */
     private String name;
