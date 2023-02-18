@@ -9,6 +9,7 @@ import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.request.UserLoginRequest;
 import com.yupi.yupao.model.domain.request.UserRegisterRequest;
+import com.yupi.yupao.model.vo.UserVO;
 import com.yupi.yupao.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -165,6 +166,19 @@ public class UserController {
         int res = userService.updateUser(user, loginUser);
         return ResultUtils.success(res);
 
+    }
+
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num,HttpServletRequest request){
+        if (num <= 0 || num > 20){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        List<User> matchUserList = userService.matchUsers(num,loginUser);
+        return ResultUtils.success(matchUserList);
     }
 
 

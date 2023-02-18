@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
+ * 队伍信息返回类
  * @author dongdong
  * @Date 2023/2/10 22:11
  */
@@ -63,5 +64,13 @@ public class TeamUserVO {
     /**
      * 创建人信息
      */
-    UserVO userVO;
+    private UserVO userVO;
+    /**
+     * 已加入用户数
+     */
+    private Integer hasJoinNum;
+    /**
+     * 是否已加入队伍
+     */
+    private boolean hasJoin = false;
 }

@@ -10,10 +10,7 @@ import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.UserTeam;
-import com.yupi.yupao.model.domain.request.TeamAddRequest;
-import com.yupi.yupao.model.domain.request.TeamJoinRequest;
-import com.yupi.yupao.model.domain.request.TeamQuitRequest;
-import com.yupi.yupao.model.domain.request.TeamUpdateRequest;
+import com.yupi.yupao.model.domain.request.*;
 import com.yupi.yupao.model.dto.TeamQuery;
 import com.yupi.yupao.model.vo.TeamUserVO;
 import com.yupi.yupao.service.TeamService;
@@ -29,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -68,10 +66,12 @@ public class TeamController {
     }
 
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(@RequestBody long id){
-        if (id <= 0){
+    public BaseResponse<Boolean> deleteTeam(@RequestBody TeamDeleteRequest teamDeleteRequest){
+        if (teamDeleteRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        Long id = teamDeleteRequest.getId();
+        //todo service做校验
         boolean result = teamService.removeById(id);
         if (!result){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除失败");
@@ -116,6 +116,7 @@ public class TeamController {
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery, true);
         return ResultUtils.success(teamList);
     }
+
     @GetMapping("/list/my/join")
     public BaseResponse<List<TeamUserVO>> listMyJoinTeam(TeamQuery teamQuery,HttpServletRequest request){
         if (teamQuery == null){
@@ -133,6 +134,7 @@ public class TeamController {
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery, true);
         return ResultUtils.success(teamList);
     }
+
     @GetMapping("/list")
     public BaseResponse<List<TeamUserVO>> listTeam(TeamQuery teamQuery,HttpServletRequest request){
         if (teamQuery == null){
@@ -140,6 +142,26 @@ public class TeamController {
         }
         boolean isAdmin = userService.isAdmin(request);
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery, isAdmin);
+        List<Long> teamIdList = teamList.stream()
+                .map(TeamUserVO::getId)
+                .collect(Collectors.toList());
+        //判断当前用户是否已加入队伍
+        //这里要判断用户是否登录，如果未登录会抛异常，所以用try catch 捕获异常
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            User loginUser = userService.getLoginUser(request);
+            userTeamQueryWrapper.eq("userId",loginUser.getId());
+            userTeamQueryWrapper.in("teamId",teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            //用户已加入队伍的teamId集合
+            Set<Long> hasJoinTeamIdSet = userTeamList.stream()
+                    .map(UserTeam::getTeamId)
+                    .collect(Collectors.toSet());
+            teamList.forEach(team -> {
+                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        } catch (Exception e){ }
         return ResultUtils.success(teamList);
     }
 
