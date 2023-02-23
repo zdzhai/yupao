@@ -10,7 +10,7 @@ import java.util.Date;
  * @Date 2023/2/10 22:11
  */
 @Data
-public class TeamUserVO {
+public class TeamVO {
     /**
      * id
      */

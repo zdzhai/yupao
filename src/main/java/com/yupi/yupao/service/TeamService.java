@@ -7,7 +7,7 @@ import com.yupi.yupao.model.domain.request.TeamJoinRequest;
 import com.yupi.yupao.model.domain.request.TeamQuitRequest;
 import com.yupi.yupao.model.domain.request.TeamUpdateRequest;
 import com.yupi.yupao.model.dto.TeamQuery;
-import com.yupi.yupao.model.vo.TeamUserVO;
+import com.yupi.yupao.model.vo.TeamVO;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public interface TeamService extends IService<Team> {
      * @param isAdmin
      * @return
      */
-    List<TeamUserVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
+    List<TeamVO> listTeams(TeamQuery teamQuery, boolean isAdmin);
 
     /**
      * 修改队伍信息

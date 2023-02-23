@@ -2,7 +2,6 @@ package com.yupi.yupao.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.common.ResultUtils;
@@ -12,11 +11,10 @@ import com.yupi.yupao.model.domain.User;
 import com.yupi.yupao.model.domain.UserTeam;
 import com.yupi.yupao.model.domain.request.*;
 import com.yupi.yupao.model.dto.TeamQuery;
-import com.yupi.yupao.model.vo.TeamUserVO;
+import com.yupi.yupao.model.vo.TeamVO;
 import com.yupi.yupao.service.TeamService;
 import com.yupi.yupao.service.UserService;
 import com.yupi.yupao.service.UserTeamService;
-import javafx.geometry.Pos;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -107,18 +105,19 @@ public class TeamController {
     }
 
     @GetMapping("/list/my/create")
-    public BaseResponse<List<TeamUserVO>> listMyCreateTeam(TeamQuery teamQuery,HttpServletRequest request){
+    public BaseResponse<List<TeamVO>> listMyCreateTeam(TeamQuery teamQuery, HttpServletRequest request){
         if (teamQuery == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
         teamQuery.setUserId(loginUser.getId());
-        List<TeamUserVO> teamList = teamService.listTeams(teamQuery, true);
+        List<TeamVO> teamList = teamService.listTeams(teamQuery, true);
+        teamList = this.calculateHasJoinNum(teamList,request);
         return ResultUtils.success(teamList);
     }
 
     @GetMapping("/list/my/join")
-    public BaseResponse<List<TeamUserVO>> listMyJoinTeam(TeamQuery teamQuery,HttpServletRequest request){
+    public BaseResponse<List<TeamVO>> listMyJoinTeam(TeamQuery teamQuery, HttpServletRequest request){
         if (teamQuery == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -131,37 +130,19 @@ public class TeamController {
                 .collect(Collectors.groupingBy(UserTeam::getTeamId));
         List<Long> idList = new ArrayList<>(listMap.keySet());
         teamQuery.setIdList(idList);
-        List<TeamUserVO> teamList = teamService.listTeams(teamQuery, true);
+        List<TeamVO> teamList = teamService.listTeams(teamQuery, true);
+        teamList = this.calculateHasJoinNum(teamList,request);
         return ResultUtils.success(teamList);
     }
 
     @GetMapping("/list")
-    public BaseResponse<List<TeamUserVO>> listTeam(TeamQuery teamQuery,HttpServletRequest request){
+    public BaseResponse<List<TeamVO>> listTeam(TeamQuery teamQuery, HttpServletRequest request){
         if (teamQuery == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean isAdmin = userService.isAdmin(request);
-        List<TeamUserVO> teamList = teamService.listTeams(teamQuery, isAdmin);
-        List<Long> teamIdList = teamList.stream()
-                .map(TeamUserVO::getId)
-                .collect(Collectors.toList());
-        //判断当前用户是否已加入队伍
-        //这里要判断用户是否登录，如果未登录会抛异常，所以用try catch 捕获异常
-        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-        try {
-            User loginUser = userService.getLoginUser(request);
-            userTeamQueryWrapper.eq("userId",loginUser.getId());
-            userTeamQueryWrapper.in("teamId",teamIdList);
-            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
-            //用户已加入队伍的teamId集合
-            Set<Long> hasJoinTeamIdSet = userTeamList.stream()
-                    .map(UserTeam::getTeamId)
-                    .collect(Collectors.toSet());
-            teamList.forEach(team -> {
-                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
-                team.setHasJoin(hasJoin);
-            });
-        } catch (Exception e){ }
+        List<TeamVO> teamList = teamService.listTeams(teamQuery, isAdmin);
+        teamList = this.calculateHasJoinNum(teamList,request);
         return ResultUtils.success(teamList);
     }
 
@@ -210,5 +191,42 @@ public class TeamController {
             throw new BusinessException(ErrorCode.NULL_ERROR,"加入用户失败");
         }
         return ResultUtils.success(result);
+    }
+    /**
+     * 计算每个队伍现有的人数
+     */
+    public List<TeamVO> calculateHasJoinNum(List<TeamVO> teamList,HttpServletRequest request){
+        //队伍Id列表
+        List<Long> teamIdList = teamList.stream()
+                .map(TeamVO::getId)
+                .collect(Collectors.toList());
+        //判断当前用户是否已加入队伍
+        //这里要判断用户是否登录，如果未登录会抛异常，所以用try catch 捕获异常
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            User loginUser = userService.getLoginUser(request);
+            userTeamQueryWrapper.eq("userId",loginUser.getId());
+            userTeamQueryWrapper.in("teamId",teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            //用户已加入队伍的teamId集合
+            Set<Long> hasJoinTeamIdSet = userTeamList.stream()
+                    .map(UserTeam::getTeamId)
+                    .collect(Collectors.toSet());
+            teamList.forEach(team -> {
+                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        } catch (Exception e){ }
+        //查询已加入队伍的人数
+        QueryWrapper<UserTeam> userTeamHasNumQueryWrapper = new QueryWrapper<>();
+        userTeamHasNumQueryWrapper.in("teamId",teamIdList);
+        List<UserTeam> userTeamList = userTeamService.list(userTeamHasNumQueryWrapper);
+        Map<Long, List<UserTeam>> teamIdUserTeamListMap = userTeamList.stream()
+                .collect(Collectors.groupingBy(UserTeam::getTeamId));
+        teamList.forEach(team -> {
+            int hasJoinNum = teamIdUserTeamListMap.getOrDefault(team.getId(), new ArrayList<>()).size();
+            team.setHasJoinNum(hasJoinNum);
+        });
+        return teamList;
     }
 }

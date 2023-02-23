@@ -150,10 +150,6 @@ public class UserController {
             log.error("redis key error",exception);
         }
         return ResultUtils.success(userPage);
-        //todo 这里还不太理解stream()流
-//        return ResultUtils.success(userList.stream().map(user -> {
-//            return userService.getSafetyUser(user);
-//        }).collect(Collectors.toList()));
     }
     @PostMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User user,HttpServletRequest request){

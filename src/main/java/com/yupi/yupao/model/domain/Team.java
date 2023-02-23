@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 队伍
@@ -62,6 +63,7 @@ public class Team implements Serializable {
     /**
      * 
      */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date updateTime;
 
     /**
